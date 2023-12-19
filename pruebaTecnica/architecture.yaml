@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: Backend API Documentation
+  description: Documentation os the backend API for technical exercise
+  version: 1.0.0
+servers:
+  - url: 127.0.0.1:8000/v1
+paths:
+  /flight:
+    post:
+      summary: Store new fligth route
+      requestBody:
+        description: Flight route, airline, aircraft and date
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                route:
+                  $ref: "#/components/schemas/FlightRoute"
+                airline:
+                  type: string
+                aircraft:
+                  type: string
+                date:
+                  type: string
+                departure:
+                  type: string
+                arrival:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "409":
+          description: Error writting db
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Get flight routes by parameters
+      parameters:
+        - in: query
+          name: departure
+          schema:
+            type: string
+          required: True
+        - in: query
+          name: arrival
+          schema:
+            type: string
+          required: True
+        - in: query
+          name: airline
+          schema:
+            type: string
+          required: False
+        - in: query
+          name: aircraft
+          schema:
+            type: string
+          required: False
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  routes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FlightRoute"
+  /flight/efficient:
+    get:
+      summary: Get most efficient flight routes given two airports
+      parameters:
+        - in: query
+          name: departure
+          schema:
+            type: string
+          required: True
+        - in: query
+          name: arrival
+          schema:
+            type: string
+          required: True
+        - in: query
+          name: getBy
+          schema:
+            type: string
+            enum: ["time", "fuel", "both"]
+          required: True
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlightRoute"
+  /flight/proposed:
+    get:
+      summary: Get a proposed route giving an existing one
+      parameters:
+        - in: query
+          name: existingRoute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  route:
+                    $ref: "#/components/schemas/FlightRoute"
+                  airline:
+                    type: string
+                  aircraft:
+                    type: string
+                  date:
+                    type: string
+                  departure:
+                    type: string
+                  arrival:
+                    type: string
+          required: True
+      responses:
+            "200":
+              description: Successful operation
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/FlightRoute"
+components:
+  schemas:
+    FlightRoute:
+      type: object
+      properties:
+        cruiseLevel:
+          type: number
+        cruiseMach:
+          type: number
+        tow:
+          type: number
+        deltaIsa:
+          type: number
+        tripFuel:
+          type: number
+        tripDistance:
+          type: number
+        fpl:
+          type: string
+        waypoints:
+          type: array
+          items:
+            type: object
+        name:
+          type: string
+        sid:
+          type: string
+        star:
+          type: string
+    Error:
+      type: object
